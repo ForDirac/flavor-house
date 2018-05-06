@@ -5,7 +5,7 @@ class ServerObject(object):
     self.db = None
 
   def init(self):
-    from flask import Flask, request, g
+    from flask import Flask
     app = Flask(__name__)
     self.app = app
 
@@ -16,7 +16,7 @@ class ServerObject(object):
     db = SQLAlchemy(app)
     self.db = db
 
-    from flask_migrate import flask_migrate
+    from flask_migrate import Migrate
     Migrate(app, db)
 
 server = ServerObject()
