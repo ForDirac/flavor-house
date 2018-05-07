@@ -20,4 +20,3 @@ class ServerObject(object):
     Migrate(app, db)
 
 server = ServerObject()
-    

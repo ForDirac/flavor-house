@@ -16,7 +16,7 @@ def sign_up():
 
   if not user_id or not password or not name:
     return jsonify({'msg':'Invalid form data'}), 400
-  
+
   user = Users()
   user.user_id = user_id
   user.password = password
