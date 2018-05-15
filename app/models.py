@@ -26,9 +26,8 @@ class Stores(db.Model):
 
 
 class Favorites(db.Model):
-  id = db.Column(db.Integer, primary_key=True)
-  user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-  store_id = db.Column(db.Integer, db.ForeignKey('stores.id'), nullable=False)
+  user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+  store_id = db.Column(db.Integer, db.ForeignKey('stores.id'), primary_key=True)
   date = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
 
@@ -48,6 +47,5 @@ class Tags(db.Model):
 
 
 class StoreTags(db.Model):
-  id = db.Column(db.Integer, primary_key=True)
-  store_id = db.Column(db.Integer, db.ForeignKey('stores.id'), nullable=False)
-  tag_id = db.Column(db.Integer, db.ForeignKey('tags.id'), nullable=False)
+  store_id = db.Column(db.Integer, db.ForeignKey('stores.id'), primary_key=True)
+  tag_id = db.Column(db.Integer, db.ForeignKey('tags.id'), primary_key=True)
