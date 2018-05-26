@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from ..core import server
-from ..models import Stores
+from ..models import Stores, Reviews, Tags, StoreTags
+from ..functions/functions import make_store_list
 
 db = server.db
 bp = Blueprint('store', __name__, url_prefix='/store')
@@ -25,7 +26,55 @@ def get_store():
   # JSON
   # - result: 성공 여부
   # - data: store_id에 해당하는 식당의 모든 정보(태그, 리뷰 포함)
-  pass
+  query_string = request.args
+  store_id = query_string.get('store_id', type=int)
+
+  if not store_id:
+    return jsonify({'result':'Invalid query string'}), 400
+
+  store = Stores.query.filter_by(id=store_id).first()
+  
+  if not store:
+    return jsonify({'result':'Invalid query string'}), 400
+
+  filtered_reviews = Reviews.query.filter_by(store_id=store.id).all()
+  filtered_tags = StoreTags.query.join(Tags).add_columns(
+    Tags.id, Tags.name, StoreTags.store_id, StoreTags.tag_id
+    ).filter(StoreTags.store_id == store.id).filter(StoreTags.tag_id == Tags.id).all()
+
+  if not filtered_reviews or not filtered_tags:
+    return jsonify({'result':'Invalid user id'}), 400
+
+  review_list = []
+  tag_list = []
+
+  for e in filtered_reviews:
+    favo = {
+      'content': e.content,
+      'likes': e.likes,
+      'date': e.date
+    }
+    review_list.append(favo)
+  
+  for i in filtered_tags:
+    favo = {
+      'name': i.name
+    }
+    tag_list.append(favo)
+
+  response = {
+    'result': 'success',
+    'data': {
+      'store_id': store.id
+      'name': store.name
+      'category': store.category
+      'score': store.score
+      'review_list': review_list
+      'tag_list': tag_list
+    }
+  }
+
+  return jsonify(response)
 
 
 # get store list by a keyword
@@ -38,7 +87,30 @@ def get_store_list_by_keyword():
   # JSON
   # - result: 성공 여부
   # - data: 키워드에 해당하는 식당 리스트(태그, 리뷰 포함)
-  pass
+  query_string = request.args
+  keyword = query_string.get('keyword', type=str)
+
+  if not keyword:
+    return jsonify({'result':'Invalid query string'}), 400
+
+  filtered_stores = Stores.query.filter(Stores.name.like(keyword + "%")).all()
+
+  if not filtered_stores:
+    return jsonify({'result':'Invalid query string'}), 400
+
+  store_list = make_store_list(filtered_stores)
+
+  if store_list == 0:
+    return jsonify({'result':'Invalid user id'}), 400
+  
+  response = {
+    'result': 'success',
+    'data': {
+      'store_list': store_list
+    }
+  }
+
+  return jsonify(response)
 
 
 # get store list by a tag
@@ -51,4 +123,34 @@ def get_store_list_by_tag():
   # JSON
   # - result: 성공 여부
   # - data: 태그에 해당하는 식당 리스트(태그, 리뷰 포함)
-  pass
+  query_string = request.args
+  tag = query_string.get('tag', type=str)
+
+  if not tag:
+    return jsonify({'result':'Invalid query string'}), 400
+
+  storetag_list = StoreTags.query.join(Tags).add_columns(
+  Tags.id, Tags.name, StoreTags.store_id, StoreTags.tag_id
+  ).filter(Tags.name == tag).filter(Tags.id == StoreTags.store_id).all()
+
+  if not storetag_list:
+    return jsonify({'result':'Invalid user id'}), 400
+
+  filtered_stores = Stores.query.filter_by(id=storetag_list.store_id).all()
+
+  if not filtered_stores:
+    return jsonify({'result':'Invalid user id'}), 400
+
+  store_list = make_store_list(filtered_stores)
+
+  if store_list == 0:
+    return jsonify({'result':'Invalid user id'}), 400
+
+  response = {
+    'result': 'success',
+    'data': {
+      'store_list': store_list
+    }
+  }
+
+  return jsonify(response)
