@@ -1,9 +1,4 @@
-from flask import Blueprint, request, jsonify
-from ..core import server
-from ..models import Stores, Reviews, Tags, StoreTags
-
-db = server.db
-bp = Blueprint('user', __name__, url_prefix='/user')
+from ..models import Stores, Reviews, Tags, StoreTags, Favorites
 
 
 def make_favorite_list(user):
@@ -12,10 +7,7 @@ def make_favorite_list(user):
   	Stores.id, Stores.name, Stores.category, Stores.score, Favorites.user_id, Favorites.store_id
   	).filter(user.id == Favorites.user_id).filter(Favorites.store_id == Stores.id).all()
 
-  if not filtered_favorites:
-  	return 0
-
-	favorite_list = []
+  favorite_list = []
 
   for e in filtered_favorites:
     favo = {
@@ -39,35 +31,32 @@ def make_store_list(filtered_stores):
     Tags.id, Tags.name, StoreTags.store_id, StoreTags.tag_id
     ).filter(StoreTags.store_id == e.id).filter(StoreTags.tag_id == Tags.id).all()
 
-    if not filtered_reviews or not filtered_tags:
-      return 0
-
     review_list = []
     tag_list = []
 
     for i in filtered_reviews:
-      favo1 = {
+      val1 = {
         'content': i.content,
         'likes': i.likes,
         'date': i.date
       }
-      review_list.append(favo1)
+      review_list.append(val1)
     
     for j in filtered_tags:
-      favo2 = {
+      val2 = {
         'name': j.name
       }
-      tag_list.append(favo2)
+      tag_list.append(val2)
 
-    favo = {
-      'store_id': e.store_id
-      'name': e.name
-      'category': e.category
-      'score': e.score
-      'review_list': review_list
+    val = {
+      'store_id': e.store_id,
+      'name': e.name,
+      'category': e.category,
+      'score': e.score,
+      'review_list': review_list,
       'tag_list': tag_list
     }
 
-    store_list.append(favo)
+    store_list.append(val)
 
   return store_list

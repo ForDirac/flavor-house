@@ -9,7 +9,7 @@ app.register_blueprint(store.bp)
 
 if __name__ == '__main__':
   app.run(
-    '0.0.0.0',
+  	'0.0.0.0',
     port=app.config['PORT'],
     debug=True,
     threaded=True

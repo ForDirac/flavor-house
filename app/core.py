@@ -19,4 +19,8 @@ class ServerObject(object):
     from flask_migrate import Migrate
     Migrate(app, db)
 
+    # google environment variable
+    import os
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.abspath("./" + config.GCLOUD_KEY_FILE)
+
 server = ServerObject()

@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from ..core import server
 from ..models import Users, Stores, Favorites
-from ..functions/functions import make_favorite_list
+from ..functions.data import make_favorite_list
 
 db = server.db
 bp = Blueprint('user', __name__, url_prefix='/user')
@@ -61,12 +61,9 @@ def get_user():
   user = Users.query.filter_by(id=user_id).first()
 
   if not user:
-    return jsonify({'result':'Invalid query string'}), 400
+    return jsonify({'result':'Invalid user'}), 400
 
   favorite_list = make_favorite_list(user)
-
-  if favorite_list == 0:
-    return jsonify({'result':'Invalid query string'}), 400
 
   response = {
     'result': 'success',
@@ -103,7 +100,7 @@ def log_in():
   ).first()
   
   if not user:
-    return jsonify({'result':'Invalid user id'}), 400
+    return jsonify({'result':'Invalid user'}), 400
 
   response = {
     'result': 'success',
@@ -127,8 +124,8 @@ def register_favorite():
   # JSON
   # - result: 성공 여부
   form = request.form
-  user_id = form.get('user_id', type=str)
-  store_id = form.get('store_id', type=str)
+  user_id = form.get('user_id', type=int)
+  store_id = form.get('store_id', type=int)
 
   if not user_id or not store_id:
     return jsonify({'result':'Invalid form data'}), 400
@@ -136,23 +133,25 @@ def register_favorite():
   user = Users.query.filter_by(id=user_id).first()
   store = Stores.query.filter_by(id=store_id).first()
 
-  if not user or not store:
-    return jsonify({'result':'Invalid user id'}), 400
+  if not user:
+    return jsonify({'result':'Invalid user'}), 400
+
+  if not store:
+    return jsonify({'result':'Invalid store'}), 400
 
   favorites = Favorites()
   favorites.user_id = user.id
   favorites.store_id = store.id
-  #favorites.date = ??
 
   try:
     db.session.add(favorites)
     db.session.commit()
   except Exception as e:
     db.session.rollback()
-    return jsonify({'result':str(e)}), 500  
+    return jsonify({'result':str(e)}), 500
 
   response = {
-    'result': 'success',
+    'result': 'success'
   }
 
   return jsonify(response)
@@ -177,13 +176,16 @@ def cancel_favorite():
   user = Users.query.filter_by(id=user_id).first()
   store = Stores.query.filter_by(id=user_id).first()
 
-  if not user or not store:
-    return jsonify({'result':'Invalid user id'}), 400
+  if not user:
+    return jsonify({'result':'Invalid user'}), 400
 
-  del_favorite = Favorites.query.filter(user_id == user.id).filter(store_id == store.id).first()
+  if not store:
+    return jsonify({'result':'Invalid store'}), 400
+
+  del_favorite = Favorites.query.filter(Favorites.user_id == user.id).filter(Favorites.store_id == store.id).first()
 
   if not del_favorite:
-    return jsonify({'result':'Invalid user id'}), 400
+    return jsonify({'result':'Invalid del_favorite'}), 400
 
   try:
     db.session.delete(del_favorite)
@@ -194,14 +196,14 @@ def cancel_favorite():
 
 
   response = {
-    'result': 'success',
+    'result': 'success'
   }
 
   return jsonify(response)
 
 # get user's favorite
-@bp.route('/favorite/<temp>', methods=['GET'])
-def get_favorite_list(temp):
+@bp.route('/favorite', methods=['GET'])
+def get_favorite_list():
   ## Request ##
   # Query String
   # - user_id: 'users' table에서 id에 해당하는 값(favorite list을 가져올 유저)
@@ -218,12 +220,9 @@ def get_favorite_list(temp):
   user = Users.query.filter_by(id=user_id).first()
   
   if not user:
-    return jsonify({'result':'Invalid query string'}), 400
+    return jsonify({'result':'Invalid user'}), 400
 
   favorite_list = make_favorite_list(filtered_favorites)
-
-  if favorite_list == 0:
-    return jsonify({'result':'Invalid query string'}), 400
 
   response = {
     'result': 'success',
