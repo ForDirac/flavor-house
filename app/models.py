@@ -18,6 +18,7 @@ class Stores(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   name = db.Column(db.String(100), nullable=False)
   category = db.Column(db.String(100), nullable=False)
+  description = db.Column(db.String(1000))
   score = db.Column(db.Float)
   # relations
   store_user_relation = db.relationship('Favorites', backref='stores', lazy='dynamic')

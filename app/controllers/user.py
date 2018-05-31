@@ -70,7 +70,7 @@ def get_user():
     'data': {
       'user_id': user.id,
       'name': user.name,
-      'favorites': favorite_list #TODO
+      'favorite_list': favorite_list #TODO
     }
   }
   return jsonify(response)
@@ -194,7 +194,6 @@ def cancel_favorite():
     db.session.rollback()
     return jsonify({'result':str(e)}), 500  
 
-
   response = {
     'result': 'success'
   }
@@ -226,9 +225,7 @@ def get_favorite_list():
 
   response = {
     'result': 'success',
-    'data': {
-      'favorite_list': favorite_list
-    }
+    'data': favorite_list
   }
 
   return jsonify(response)

@@ -63,6 +63,7 @@ def get_store():
       'store_id': store.id,
       'name': store.name,
       'category': store.category,
+      'description': store.description,
       'score': store.score,
       'review_list': review_list,
       'tag_list': tag_list
@@ -104,9 +105,7 @@ def get_store_list_by_keyword():
   
   response = {
     'result': 'success',
-    'data': {
-      'store_list': store_list
-    }
+    'data': store_list
   }
 
   return jsonify(response)
@@ -135,9 +134,7 @@ def get_store_list_by_tag():
   if not storetag_list:
     response = {
       'result': 'success',
-      'data': {
-        'store_list': []
-      }
+      'data': []
     }
     return jsonify(response)
 
@@ -151,9 +148,7 @@ def get_store_list_by_tag():
 
   response = {
     'result': 'success',
-    'data': {
-      'store_list': store_list
-    }
+    'data': store_list
   }
 
   return jsonify(response)
