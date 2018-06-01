@@ -11,6 +11,7 @@ def make_favorite_list(user):
 
   for e in filtered_favorites:
     favo = {
+      'store_id': e.store_id
       'name': e.name,
       'category': e.category,
       'score': e.score
@@ -43,15 +44,14 @@ def make_store_list(filtered_stores):
       review_list.append(val1)
     
     for j in filtered_tags:
-      val2 = {
-        'name': j.name
-      }
+      val2 = j.name
       tag_list.append(val2)
 
     val = {
       'store_id': e.store_id,
       'name': e.name,
       'category': e.category,
+      'description': e.description,
       'score': e.score,
       'review_list': review_list,
       'tag_list': tag_list
