@@ -21,6 +21,6 @@ class ServerObject(object):
 
     # google environment variable
     import os
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.abspath("./" + config.GCLOUD_KEY_FILE)
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.abspath("./app/" + config.GCLOUD_KEY_FILE)
 
 server = ServerObject()

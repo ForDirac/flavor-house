@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify
 from ..core import server
 from ..models import Stores, Reviews, Tags, StoreTags
 from ..functions.data import make_store_list
+from ..functions.api import sentiment_text
+from ..functions.api import entities_text
 
 db = server.db
 bp = Blueprint('store', __name__, url_prefix='/store')
@@ -14,7 +16,14 @@ def register_store():
   ## Response ##
   # JSON
   # - result: 성공 여부
-  pass
+  text = "이 광화문 옆에 있는 뚝배기는 정말 마음에 들어서 깨버리고싶어!"
+  senti_score = sentiment_text(text)
+  print(senti_score)
+  entities = entities_text(text)
+  for entity in entities:
+    print(u'{} {}'.format('name :', entity.name))
+
+  return "success"
 
 # get store by store_id
 @bp.route('', methods=['GET'])
