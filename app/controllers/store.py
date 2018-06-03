@@ -5,8 +5,18 @@ from ..functions.data import make_store_list
 from ..functions.api import sentiment_text
 from ..functions.api import entities_text
 
+import requests
+
 db = server.db
 bp = Blueprint('store', __name__, url_prefix='/store')
+
+@bp.route('', methods=['PUT'])
+def get_store_from_bablabs():
+  r = requests.post('http://localhost:7890/openapi/temp/store/', headers={'AUTH-KEY': '##flavor-house'})
+  store_list = r.json()
+
+  print(str(store_list))
+  return 'success'
 
 # register store with 'score' and 'tags' using BABLABS API and Google Natural Language API
 @bp.route('', methods=['POST'])
@@ -74,7 +84,6 @@ def register_store():
       # register the tag
       try:
         db.session.add(tag)
-        db.session.commit()
       except Exception as e:
         db.session.rollback()
         return jsonify({'result':str(e)}), 500
@@ -88,10 +97,15 @@ def register_store():
       # register the storetag
       try:
         db.session.add(storetag)
-        db.session.commit()
       except Exception as e:
         db.session.rollback()
         return jsonify({'result':str(e)}), 500
+
+  try:
+    db.session.commit()
+  except Exception as e:
+    db.session.rollback()
+    return jsonify({'result':str(e)}), 500
 
   response = {
     'result': 'success'
