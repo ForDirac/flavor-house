@@ -212,7 +212,9 @@ def get_store_list_by_tag():
 
   storetag_list = StoreTags.query.join(Tags).add_columns(
   Tags.id, Tags.name, StoreTags.store_id, StoreTags.tag_id
-  ).filter(Tags.name == tag).filter(Tags.id == StoreTags.store_id).all()
+  ).filter(Tags.name == tag).filter(Tags.id == StoreTags.tag_id).all()
+
+  print(storetag_list)
 
   if not storetag_list:
     response = {
