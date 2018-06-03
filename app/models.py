@@ -38,6 +38,8 @@ class Reviews(db.Model):
   content = db.Column(db.String(1000))
   likes = db.Column(db.Integer, nullable=False, default=0)
   date = db.Column(db.DateTime, nullable=False)
+  #add
+  score = db.Column(db.Float)
 
 
 class Tags(db.Model):
