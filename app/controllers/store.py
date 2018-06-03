@@ -15,7 +15,6 @@ def get_store_from_bablabs():
   r = requests.post('http://localhost:7890/openapi/temp/store/', headers={'AUTH-KEY': '##flavor-house'})
   store_list = r.json()
 
-  print(str(store_list))
   return 'success'
 
 # register store with 'score' and 'tags' using BABLABS API and Google Natural Language API
@@ -227,8 +226,6 @@ def get_store_list_by_tag():
   storetag_list = StoreTags.query.join(Tags).add_columns(
   Tags.id, Tags.name, StoreTags.store_id, StoreTags.tag_id
   ).filter(Tags.name == tag).filter(Tags.id == StoreTags.tag_id).all()
-
-  print(storetag_list)
 
   if not storetag_list:
     response = {
