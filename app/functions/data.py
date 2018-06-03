@@ -11,7 +11,7 @@ def make_favorite_list(user):
 
   for e in filtered_favorites:
     favo = {
-      'store_id': e.store_id
+      'store_id': e.store_id,
       'name': e.name,
       'category': e.category,
       'score': e.score
