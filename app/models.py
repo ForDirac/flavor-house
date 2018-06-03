@@ -19,6 +19,7 @@ class Stores(db.Model):
   name = db.Column(db.String(100), nullable=False)
   category = db.Column(db.String(100), nullable=False)
   description = db.Column(db.String(1000))
+  telephone = db.Column(db.String(20))
   score = db.Column(db.Float)
   # relations
   store_user_relation = db.relationship('Favorites', backref='stores', lazy='dynamic')

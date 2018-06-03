@@ -5,8 +5,18 @@ from ..functions.data import make_store_list
 from ..functions.api import sentiment_text
 from ..functions.api import entities_text
 
+import requests
+
 db = server.db
 bp = Blueprint('store', __name__, url_prefix='/store')
+
+@bp.route('', methods=['PUT'])
+def get_store_from_bablabs():
+  r = requests.post('http://localhost:7890/openapi/temp/store/', headers={'AUTH-KEY': '##flavor-house'})
+  store_list = r.json()
+
+  print(str(store_list))
+  return 'success'
 
 # register store with 'score' and 'tags' using BABLABS API and Google Natural Language API
 @bp.route('', methods=['POST'])
@@ -18,7 +28,7 @@ def register_store():
   # - result: 성공 여부
 
   # info에 store, 해당 store의 reviews 포함되어있음 -> info = {store, review_list}
-  info_list = BABLABS_api()
+  info_list = store_list()
 
   for info in info_list:
     
@@ -27,10 +37,10 @@ def register_store():
     store.name = info.store.name
     store.category = info.store.category
     store.description = info.store.description
+    store.telephone = info.store.telephone
     store.score = 0  # initialize since the review model needs store.store_id(primary key)
     try:
       db.session.add(store)
-      db.session.commit()
     except Exception as e:
       db.session.rollback()
       return jsonify({'result':str(e)}), 500
@@ -38,7 +48,7 @@ def register_store():
     total_score = 0
     tag_dic = {}
     # Recall the store in Stores for update the store's score and get the tag_id
-    n_store = Stores.query.filter_by(name=info.store.name)
+    n_store = Stores.query.filter_by(name=info.store.name).fisrt()
 
     # register reviews which are in review_list in info into our Database (update the total_score)
     for i_review in info.review_list:
@@ -62,7 +72,6 @@ def register_store():
       # register the review
       try:
         db.session.add(review)
-        db.session.commit()
       except Exception as e:
         db.session.rollback()
         return jsonify({'result':str(e)}), 500
@@ -89,13 +98,12 @@ def register_store():
       # register the tag
       try:
         db.session.add(tag)
-        db.session.commit()
       except Exception as e:
         db.session.rollback()
         return jsonify({'result':str(e)}), 500
 
       # Recall the tag in Tags for get the tag_id
-      n_tag = Tags.query.filter_by(name=info.store.name)
+      n_tag = Tags.query.filter_by(name=info.store.name).first()
       storetag = StoreTags()
       storetag.store_id = n_store.store_id
       storetag.tag_id = n_tag.tag_id
@@ -103,10 +111,15 @@ def register_store():
       # register the storetag
       try:
         db.session.add(storetag)
-        db.session.commit()
       except Exception as e:
         db.session.rollback()
         return jsonify({'result':str(e)}), 500
+
+  try:
+    db.session.commit()
+  except Exception as e:
+    db.session.rollback()
+    return jsonify({'result':str(e)}), 500
 
   response = {
     'result': 'success'
