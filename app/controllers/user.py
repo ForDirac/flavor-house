@@ -9,7 +9,7 @@ bp = Blueprint('user', __name__, url_prefix='/user')
 
 
 # sign up an user
-@bp.route('', methods=['POST', 'OPTION'])
+@bp.route('', methods=['POST', 'OPTIONS'])
 @cross_domain('*')
 def sign_up():
   ## Request ##
@@ -45,7 +45,7 @@ def sign_up():
   return jsonify(response)
 
 # get a user
-@bp.route('', methods=['GET', 'OPTION'])
+@bp.route('', methods=['GET', 'OPTIONS'])
 @cross_domain('*')
 def get_user():
   ## Request ##
@@ -80,7 +80,7 @@ def get_user():
 
 
 # log in a user
-@bp.route('/login', methods=['POST', 'OPTION'])
+@bp.route('/login', methods=['POST', 'OPTIONS'])
 @cross_domain('*')
 def log_in():
   ## Request ##
@@ -118,7 +118,7 @@ def log_in():
 
 
 # register user favorite
-@bp.route('/favorite', methods=['POST', 'OPTION'])
+@bp.route('/favorite', methods=['POST', 'OPTIONS'])
 @cross_domain('*')
 def register_favorite():
   ## Request ##
@@ -162,7 +162,7 @@ def register_favorite():
   return jsonify(response)
 
 # cancel user's favorite
-@bp.route('/favorite', methods=['DELETE', 'OPTION'])
+@bp.route('/favorite', methods=['DELETE', 'OPTIONS'])
 @cross_domain('*')
 def cancel_favorite():
   ## Request ##
@@ -207,7 +207,7 @@ def cancel_favorite():
   return jsonify(response)
 
 # get user's favorite
-@bp.route('/favorite', methods=['GET', 'OPTION'])
+@bp.route('/favorite', methods=['GET', 'OPTIONS'])
 @cross_domain('*')
 def get_favorite_list():
   ## Request ##

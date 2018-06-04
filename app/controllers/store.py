@@ -152,7 +152,7 @@ def register_store():
 
 
 # get store by store_id
-@bp.route('', methods=['GET', 'OPTION'])
+@bp.route('', methods=['GET', 'OPTIONS'])
 @cross_domain('*')
 def get_store():
   ## Request ##
@@ -210,7 +210,7 @@ def get_store():
 
 
 # get store list by a keyword
-@bp.route('/list/keyword', methods=['GET', 'OPTION'])
+@bp.route('/list/keyword', methods=['GET', 'OPTIONS'])
 @cross_domain('*')
 def get_store_list_by_keyword():
   ## Request ##
@@ -249,7 +249,7 @@ def get_store_list_by_keyword():
 
 
 # get store list by a tag
-@bp.route('/list/tag', methods=['GET', 'OPTION'])
+@bp.route('/list/tag', methods=['GET', 'OPTIONS'])
 @cross_domain('*')
 def get_store_list_by_tag():
   ## Request ##
