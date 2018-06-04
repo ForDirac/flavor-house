@@ -39,7 +39,7 @@ def make_store_list(filtered_stores):
       val1 = {
         'content': i.content,
         'likes': i.likes,
-        'date': i.date
+        'date': i.date,
         'score': i.score
       }
       review_list.append(val1)
@@ -61,4 +61,3 @@ def make_store_list(filtered_stores):
     store_list.append(val)
 
   return store_list
-  
