@@ -15,7 +15,6 @@ def get_store_from_bablabs():
   r = requests.post('http://localhost:7890/openapi/temp/store/', headers={'AUTH-KEY': '##flavor-house'})
   store_list = r.json()
 
-  print(str(store_list))
   return 'success'
 
 # register store with 'score' and 'tags' using BABLABS API and Google Natural Language API
@@ -26,74 +25,60 @@ def register_store():
   ## Response ##
   # JSON
   # - result: 성공 여부
-
-  # info에 store, 해당 store의 reviews 포함되어있음 -> info = {store, review_list}
-  info_list = store_list()
-
-  for info in info_list:
-    
-    # register the store which is in info into our Database (except the score)
-    store = Stores()
-    store.name = info.store.name
-    store.category = info.store.category
-    store.description = info.store.description
-    store.telephone = info.store.telephone
-    store.score = 0  # initialize since the review model needs store.store_id(primary key)
-    try:
-      db.session.add(store)
-    except Exception as e:
-      db.session.rollback()
-      return jsonify({'result':str(e)}), 500
+  store_list = Stores.query.all()
+  for store in store_list:
+    review_list = Reviews.query.filter_by(store_id=store.id).all()
 
     total_score = 0
     tag_dic = {}
-    # Recall the store in Stores for update the store's score and get the tag_id
-    n_store = Stores.query.filter_by(name=info.store.name).fisrt()
 
-    # register reviews which are in review_list in info into our Database (update the total_score)
-    for i_review in info.review_list:
-      review = Reviews()
-      review.store_id = n_store.store_id # Primary key(store_id)는 DB에 넣으면 자동으로 생기나?
-      review.content = i_review.content # str type
-      review.likes = i_review.likes
-      review.date = i_review.date
-      review.score = sentiment_text(i_review.content)
+    for review in review_list:
+      review.score = sentiment_text(review.content)
       total_score = total_score + review.score
 
-      # make tags in that review 
-      # tags which is appeared are in tag_dic
-      tags = entities_text(i_review.content)
-      for tag in tags:
-        if(tag_dic[tag.name]):
-          tag_dic[tag.name] = tag_dic[tag.name] + 1
-        else:
-          tag_dic[tag.name] = 1
-
-      # register the review
+      # Update the review.score
       try:
-        db.session.add(review)
+        db.session.commit()
       except Exception as e:
         db.session.rollback()
         return jsonify({'result':str(e)}), 500
 
-    # Update the store's score
-    aver_score = total_score / len(info.review_list)
-    if(aver_score < 0): # negative(0~50)
-      n_store.score = (-aver_score) * 50
-    else: # positive(50~100)
-      n_store.score = aver_score * 50 + 50
-    db.session.commit()
+      # make tags in that review 
+      # tags which is appeared are in tag_dic
+      tags = entities_text(review.content)
+      for tag in tags:
+        if tag.name in tag_dic:
+          tag_dic[tag.name] = tag_dic[tag.name] + 1
+        else:
+          tag_dic[tag.name] = 1
+
+    total_review = len(review_list)
+    if(total_review == 0):
+      store.score = None
+    else:
+      aver_score = total_score / len(review_list)
+      if(aver_score < 0): # negative(0~50)
+        store.score = (-aver_score) * 50
+      else: # positive(50~100)
+        store.score = aver_score * 50 + 50
+
+    # Update the store.score
+    try:
+      db.session.commit()
+    except Exception as e:
+      db.session.rollback()
+      return jsonify({'result':str(e)}), 500
 
     # check all tags which is appeared more than twice
     real_taglist = []
-    for tag in tag_dic.items():
-      if(tag[1] > 1):
-        real_taglist.append(tag[0])
+    for tag_item in tag_dic.items():
+      if(tag_item[1] > 3):
+        real_taglist.append(tag_item[0])
 
     # register all tags which are in real_taglist in info into our Database (update the total_score)
-    for i_tag in real_taglist:
+    for tag_name in real_taglist:
       tag = Tags()
-      tag.name = i_tag
+      tag.name = tag_name
 
       # register the tag
       try:
@@ -103,10 +88,10 @@ def register_store():
         return jsonify({'result':str(e)}), 500
 
       # Recall the tag in Tags for get the tag_id
-      n_tag = Tags.query.filter_by(name=info.store.name).first()
+      recall_tag = Tags.query.filter_by(name=tag_name).first()
       storetag = StoreTags()
-      storetag.store_id = n_store.store_id
-      storetag.tag_id = n_tag.tag_id
+      storetag.store_id = store.id
+      storetag.tag_id = recall_tag.id
 
       # register the storetag
       try:
@@ -240,7 +225,7 @@ def get_store_list_by_tag():
 
   storetag_list = StoreTags.query.join(Tags).add_columns(
   Tags.id, Tags.name, StoreTags.store_id, StoreTags.tag_id
-  ).filter(Tags.name == tag).filter(Tags.id == StoreTags.store_id).all()
+  ).filter(Tags.name == tag).filter(Tags.id == StoreTags.tag_id).all()
 
   if not storetag_list:
     response = {

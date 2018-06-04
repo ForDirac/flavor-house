@@ -48,7 +48,7 @@ def make_store_list(filtered_stores):
       tag_list.append(val2)
 
     val = {
-      'store_id': e.store_id,
+      'store_id': e.id,
       'name': e.name,
       'category': e.category,
       'description': e.description,
