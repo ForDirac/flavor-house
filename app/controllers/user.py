@@ -28,6 +28,11 @@ def sign_up():
   if not user_id or not password or not name:
     return jsonify({'result':'Invalid form data'}), 400
 
+  #duplicate
+  user = User.query.filter_by(user_id=user_id).first()
+  if user:
+    return jsonify({'result':'The ID is already exists'}), 400
+  
   user = Users()
   user.user_id = user_id
   user.password = password
