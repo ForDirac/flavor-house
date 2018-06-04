@@ -29,7 +29,7 @@ def sign_up():
     return jsonify({'result':'Invalid form data'}), 400
 
   #duplicate
-  user = User.query.filter_by(user_id=user_id).first()
+  user = Users.query.filter_by(user_id=user_id).first()
   if user:
     return jsonify({'result':'The ID is already exists'}), 400
   
