@@ -185,7 +185,8 @@ def get_store():
     val = {
       'content': e.content,
       'likes': e.likes,
-      'date': e.date
+      'date': e.date,
+      'score': e.score
     }
     review_list.append(favo)
   
@@ -198,7 +199,7 @@ def get_store():
     'data': {
       'store_id': store.id,
       'name': store.name,
-      'category': store.category,
+      'telephone': store.telephone,
       'description': store.description,
       'score': store.score,
       'review_list': review_list,

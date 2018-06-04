@@ -4,7 +4,7 @@ from ..models import Stores, Reviews, Tags, StoreTags, Favorites
 def make_favorite_list(user):
 
   filtered_favorites = Favorites.query.join(Stores).add_columns(
-  	Stores.id, Stores.name, Stores.category, Stores.score, Favorites.user_id, Favorites.store_id
+  	Stores.id, Stores.name, Stores.telephone, Stores.score, Favorites.user_id, Favorites.store_id
   	).filter(user.id == Favorites.user_id).filter(Favorites.store_id == Stores.id).all()
 
   favorite_list = []
@@ -13,7 +13,7 @@ def make_favorite_list(user):
     favo = {
       'store_id': e.store_id,
       'name': e.name,
-      'category': e.category,
+      'telephone': e.telephone,
       'score': e.score
     }
     favorite_list.append(favo)
@@ -40,6 +40,7 @@ def make_store_list(filtered_stores):
         'content': i.content,
         'likes': i.likes,
         'date': i.date
+        'score': i.score
       }
       review_list.append(val1)
     
@@ -50,7 +51,7 @@ def make_store_list(filtered_stores):
     val = {
       'store_id': e.id,
       'name': e.name,
-      'category': e.category,
+      'telephone': e.telephone,
       'description': e.description,
       'score': e.score,
       'review_list': review_list,
@@ -60,3 +61,4 @@ def make_store_list(filtered_stores):
     store_list.append(val)
 
   return store_list
+  
