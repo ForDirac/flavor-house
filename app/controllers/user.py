@@ -180,7 +180,7 @@ def cancel_favorite():
     return jsonify({'result':'Invalid query string'}), 400
 
   user = Users.query.filter_by(id=user_id).first()
-  store = Stores.query.filter_by(id=user_id).first()
+  store = Stores.query.filter_by(id=store_id).first()
 
   if not user:
     return jsonify({'result':'Invalid user'}), 400
@@ -228,7 +228,7 @@ def get_favorite_list():
   if not user:
     return jsonify({'result':'Invalid user'}), 400
 
-  favorite_list = make_favorite_list(filtered_favorites)
+  favorite_list = make_favorite_list(user)
 
   response = {
     'result': 'success',

@@ -188,7 +188,7 @@ def get_store():
       'date': e.date,
       'score': e.score
     }
-    review_list.append(favo)
+    review_list.append(val)
   
   for i in filtered_tags:
     val = i.name
