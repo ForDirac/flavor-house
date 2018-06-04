@@ -4,6 +4,7 @@ from ..models import Stores, Reviews, Tags, StoreTags
 from ..functions.data import make_store_list
 from ..functions.api import sentiment_text
 from ..functions.api import entities_text
+from ..functions.cors import cross_domain
 from datetime import datetime
 
 import requests
@@ -151,7 +152,8 @@ def register_store():
 
 
 # get store by store_id
-@bp.route('', methods=['GET'])
+@bp.route('', methods=['GET', 'OPTION'])
+@cross_domain('*')
 def get_store():
   ## Request ##
   # Query String
@@ -208,7 +210,8 @@ def get_store():
 
 
 # get store list by a keyword
-@bp.route('/list/keyword', methods=['GET'])
+@bp.route('/list/keyword', methods=['GET', 'OPTION'])
+@cross_domain('*')
 def get_store_list_by_keyword():
   ## Request ##
   # Query String
@@ -246,7 +249,8 @@ def get_store_list_by_keyword():
 
 
 # get store list by a tag
-@bp.route('/list/tag', methods=['GET'])
+@bp.route('/list/tag', methods=['GET', 'OPTION'])
+@cross_domain('*')
 def get_store_list_by_tag():
   ## Request ##
   # Query String
