@@ -4,6 +4,8 @@ from ..models import Stores, Reviews, Tags, StoreTags
 from ..functions.data import make_store_list
 from ..functions.api import sentiment_text
 from ..functions.api import entities_text
+from ..functions.cors import cross_domain
+from datetime import datetime
 
 import requests
 
@@ -12,8 +14,45 @@ bp = Blueprint('store', __name__, url_prefix='/store')
 
 @bp.route('', methods=['PUT'])
 def get_store_from_bablabs():
-  r = requests.post('http://localhost:7890/openapi/temp/store/', headers={'AUTH-KEY': '##flavor-house'})
-  store_list = r.json()
+  r = requests.get('http://localhost:7890/openapi/temp/store/', headers={'AUTH-KEY': '##flavor-house'})
+  data = r.json()
+  store_list = data.get('data')
+  for s in store_list:
+    store = Stores()
+    store.name = s['name']
+    store.description = s['description']
+    store.telephone = s['telephone']
+    store.score = 0
+    db.session.add(store)
+    db.session.flush()
+    for c in s['comments']:
+      review = Reviews()
+      review.store_id = store.id
+      review.content = c['description']
+      review.likes = c['like_number']
+      review.date = datetime.strptime(c['date'], '%b, %d %m %Y %H:%M:%S %Z')
+      review.score = 0
+      db.session.add(review)
+
+  try:
+    db.session.commit()
+  except Exception as e:
+    db.session.rollback()
+    return 'failure'
+  return 'success'
+
+@bp.route('/date', methods=['PUT'])
+def update_review_date():
+  r = requests.get('http://localhost:7890/openapi/temp/store/', headers={'AUTH-KEY': '##flavor-house'})
+  data = r.json()
+  store_list = data.get('data')
+  for s in store_list:
+    for c in s['comments']:
+      r = Reviews.query.filter_by(content=c['description']).first()
+      if not r:
+        continue
+      r.date = datetime.strptime(c['date'], '%a, %d %b %Y %H:%M:%S %Z')
+      db.session.commit()
 
   return 'success'
 
@@ -113,7 +152,8 @@ def register_store():
 
 
 # get store by store_id
-@bp.route('', methods=['GET'])
+@bp.route('', methods=['GET', 'OPTIONS'])
+@cross_domain('*')
 def get_store():
   ## Request ##
   # Query String
@@ -170,7 +210,8 @@ def get_store():
 
 
 # get store list by a keyword
-@bp.route('/list/keyword', methods=['GET'])
+@bp.route('/list/keyword', methods=['GET', 'OPTIONS'])
+@cross_domain('*')
 def get_store_list_by_keyword():
   ## Request ##
   # Query String
@@ -208,7 +249,8 @@ def get_store_list_by_keyword():
 
 
 # get store list by a tag
-@bp.route('/list/tag', methods=['GET'])
+@bp.route('/list/tag', methods=['GET', 'OPTIONS'])
+@cross_domain('*')
 def get_store_list_by_tag():
   ## Request ##
   # Query String

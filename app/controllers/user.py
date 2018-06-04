@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from ..core import server
 from ..models import Users, Stores, Favorites
+from ..functions.cors import cross_domain
 from ..functions.data import make_favorite_list
 
 db = server.db
@@ -8,7 +9,8 @@ bp = Blueprint('user', __name__, url_prefix='/user')
 
 
 # sign up an user
-@bp.route('', methods=['POST'])
+@bp.route('', methods=['POST', 'OPTIONS'])
+@cross_domain('*')
 def sign_up():
   ## Request ##
   # Form Data
@@ -43,7 +45,8 @@ def sign_up():
   return jsonify(response)
 
 # get a user
-@bp.route('', methods=['GET'])
+@bp.route('', methods=['GET', 'OPTIONS'])
+@cross_domain('*')
 def get_user():
   ## Request ##
   # Query String
@@ -77,7 +80,8 @@ def get_user():
 
 
 # log in a user
-@bp.route('/login', methods=['POST'])
+@bp.route('/login', methods=['POST', 'OPTIONS'])
+@cross_domain('*')
 def log_in():
   ## Request ##
   # Form Data
@@ -114,7 +118,8 @@ def log_in():
 
 
 # register user favorite
-@bp.route('/favorite', methods=['POST'])
+@bp.route('/favorite', methods=['POST', 'OPTIONS'])
+@cross_domain('*')
 def register_favorite():
   ## Request ##
   # Form Data
@@ -157,7 +162,8 @@ def register_favorite():
   return jsonify(response)
 
 # cancel user's favorite
-@bp.route('/favorite', methods=['DELETE'])
+@bp.route('/favorite', methods=['DELETE', 'OPTIONS'])
+@cross_domain('*')
 def cancel_favorite():
   ## Request ##
   # Query String
@@ -201,7 +207,8 @@ def cancel_favorite():
   return jsonify(response)
 
 # get user's favorite
-@bp.route('/favorite', methods=['GET'])
+@bp.route('/favorite', methods=['GET', 'OPTIONS'])
+@cross_domain('*')
 def get_favorite_list():
   ## Request ##
   # Query String
