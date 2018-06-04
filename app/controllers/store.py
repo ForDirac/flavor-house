@@ -56,6 +56,54 @@ def update_review_date():
 
   return 'success'
 
+
+@bp.route('/score', methods=['POST'])
+def register_store_score():
+  ## Request ##
+  # ??
+  ## Response ##
+  # JSON
+  # - result: 성공 여부
+  store_list = Stores.query.all()
+  for store in store_list:
+    review_list = Reviews.query.filter_by(store_id=store.id).all()
+
+    total_score = 0
+
+    for review in review_list:
+      # review.score = (1 + (int)sentiment_text(review.content)) * 50
+      r_score = review.score
+      review.score = (1 + r_score) * 50
+      total_score = total_score + review.score
+
+      # Update the review.score
+      try:
+        db.session.commit()
+      except Exception as e:
+        db.session.rollback()
+        return jsonify({'result':str(e)}), 500
+
+    total_review = len(review_list)
+    if(total_review == 0):
+      store.score = None
+    else:
+      aver_score = total_score / len(review_list)
+      store.score = aver_score
+
+    # Update the store.score
+    try:
+      db.session.commit()
+    except Exception as e:
+      db.session.rollback()
+      return jsonify({'result':str(e)}), 500
+
+  response = {
+    'result': 'success'
+  }
+  return jsonify(response)
+
+
+
 # register store with 'score' and 'tags' using BABLABS API and Google Natural Language API
 @bp.route('', methods=['POST'])
 def register_store():
