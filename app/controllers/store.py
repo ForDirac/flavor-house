@@ -4,6 +4,7 @@ from ..models import Stores, Reviews, Tags, StoreTags
 from ..functions.data import make_store_list
 from ..functions.api import sentiment_text
 from ..functions.api import entities_text
+from ..functions.utils import sort_by_score
 from ..functions.cors import cross_domain
 from datetime import datetime
 
@@ -331,8 +332,7 @@ def get_store_list_by_tag():
     val = Stores.query.filter_by(id=i.store_id).first()
     filtered_stores.append(val)
 
-  sorted(filtered_stores, key= lambda x: x.score, reverse=True)
-
+  filtered_stores = sorted(filtered_stores, key=sort_by_score, reverse=True)
   store_list = make_store_list(filtered_stores)
 
   response = {

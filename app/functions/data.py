@@ -1,4 +1,5 @@
 from ..models import Stores, Reviews, Tags, StoreTags, Favorites
+from ..functions.utils import sort_by_score
 
 
 def make_favorite_list(user):
@@ -8,7 +9,7 @@ def make_favorite_list(user):
   	).filter(user.id == Favorites.user_id).filter(Favorites.store_id == Stores.id).all()
 
   favorite_list = []
-  sorted(filtered_favorites, key= lambda x: x.score, reverse=True)
+  filtered_favorites = sorted(filtered_favorites, key= sort_by_score, reverse=True)
 
   for e in filtered_favorites:
     filtered_reviews = Reviews.query.filter_by(store_id=e.id).order_by(Reviews.date.desc()).all()
