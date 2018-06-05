@@ -221,7 +221,7 @@ def get_store():
   if not store:
     return jsonify({'result':'Invalid store'}), 400
 
-  filtered_reviews = Reviews.query.filter_by(store_id=store.id).all()
+  filtered_reviews = Reviews.query.filter_by(store_id=store.id).order_by(Reviews.date.desc()).all()
   filtered_tags = StoreTags.query.join(Tags).add_columns(
     Tags.id, Tags.name, StoreTags.store_id, StoreTags.tag_id
     ).filter(StoreTags.store_id == store.id).filter(StoreTags.tag_id == Tags.id).all()

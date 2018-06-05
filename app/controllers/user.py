@@ -45,7 +45,11 @@ def sign_up():
     return jsonify({'result':str(e)}), 500
 
   response = {
-    'result': 'success'
+    'result': 'success',
+    'data': {
+      'user_id': user.id,
+      'name': user.name
+    }
   }
   return jsonify(response)
 
