@@ -282,7 +282,7 @@ def get_store_list_by_keyword():
 
   search = search + "%"
 
-  filtered_stores = Stores.query.filter(Stores.name.like(search)).all()
+  filtered_stores = Stores.query.filter(Stores.name.like(search)).order_by(Stores.score.desc()).all()
 
   if not filtered_stores:
     return jsonify({'result':'Invalid filtered_stores'}), 400
@@ -330,6 +330,8 @@ def get_store_list_by_tag():
   for i in storetag_list:
     val = Stores.query.filter_by(id=i.store_id).first()
     filtered_stores.append(val)
+
+  sorted(filtered_stores, key= lambda x: x.score, reverse=True)
 
   store_list = make_store_list(filtered_stores)
 

@@ -8,6 +8,7 @@ def make_favorite_list(user):
   	).filter(user.id == Favorites.user_id).filter(Favorites.store_id == Stores.id).all()
 
   favorite_list = []
+  sorted(filtered_favorites, key= lambda x: x.score, reverse=True)
 
   for e in filtered_favorites:
     filtered_reviews = Reviews.query.filter_by(store_id=e.id).order_by(Reviews.date.desc()).all()
