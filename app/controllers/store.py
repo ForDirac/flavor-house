@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from sqlalchemy.sql import func
 from ..core import server
 from ..models import Stores, Reviews, Tags, StoreTags
 from ..functions.data import make_store_list
@@ -66,7 +67,7 @@ def register_store():
   # - result: 성공 여부
   store_list = Stores.query.all()
   for store in store_list:
-    review_list = Reviews.query.filter_by(store_id=store.id).all()
+    review_list = Reviews.query.with_entities(func.avg(Reviews.score).label('aver_score')).filter_by(store_id=store.id).all()
 
     total_score = 0
     tag_dic = {}
