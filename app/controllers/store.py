@@ -5,6 +5,7 @@ from ..models import Stores, Reviews, Tags, StoreTags
 from ..functions.data import make_store_list
 from ..functions.api import sentiment_text
 from ..functions.api import entities_text
+from ..functions.utils import sort_by_score
 from ..functions.cors import cross_domain
 from datetime import datetime
 
@@ -56,6 +57,54 @@ def update_review_date():
       db.session.commit()
 
   return 'success'
+
+
+@bp.route('/score', methods=['POST'])
+def register_store_score():
+  ## Request ##
+  # ??
+  ## Response ##
+  # JSON
+  # - result: 성공 여부
+  store_list = Stores.query.all()
+  for store in store_list:
+    review_list = Reviews.query.filter_by(store_id=store.id).all()
+
+    total_score = 0
+
+    for review in review_list:
+      # review.score = (1 + (int)sentiment_text(review.content)) * 50
+      r_score = review.score
+      review.score = (1 + r_score) * 50
+      total_score = total_score + review.score
+
+      # Update the review.score
+      try:
+        db.session.commit()
+      except Exception as e:
+        db.session.rollback()
+        return jsonify({'result':str(e)}), 500
+
+    total_review = len(review_list)
+    if(total_review == 0):
+      store.score = None
+    else:
+      aver_score = total_score / len(review_list)
+      store.score = aver_score
+
+    # Update the store.score
+    try:
+      db.session.commit()
+    except Exception as e:
+      db.session.rollback()
+      return jsonify({'result':str(e)}), 500
+
+  response = {
+    'result': 'success'
+  }
+  return jsonify(response)
+
+
 
 # register store with 'score' and 'tags' using BABLABS API and Google Natural Language API
 @bp.route('', methods=['POST'])
@@ -174,7 +223,7 @@ def get_store():
   if not store:
     return jsonify({'result':'Invalid store'}), 400
 
-  filtered_reviews = Reviews.query.filter_by(store_id=store.id).all()
+  filtered_reviews = Reviews.query.filter_by(store_id=store.id).order_by(Reviews.date.desc()).all()
   filtered_tags = StoreTags.query.join(Tags).add_columns(
     Tags.id, Tags.name, StoreTags.store_id, StoreTags.tag_id
     ).filter(StoreTags.store_id == store.id).filter(StoreTags.tag_id == Tags.id).all()
@@ -189,7 +238,7 @@ def get_store():
       'date': e.date,
       'score': e.score
     }
-    review_list.append(favo)
+    review_list.append(val)
   
   for i in filtered_tags:
     val = i.name
@@ -235,7 +284,7 @@ def get_store_list_by_keyword():
 
   search = search + "%"
 
-  filtered_stores = Stores.query.filter(Stores.name.like(search)).all()
+  filtered_stores = Stores.query.filter(Stores.name.like(search)).order_by(Stores.score.desc()).all()
 
   if not filtered_stores:
     return jsonify({'result':'Invalid filtered_stores'}), 400
@@ -284,6 +333,7 @@ def get_store_list_by_tag():
     val = Stores.query.filter_by(id=i.store_id).first()
     filtered_stores.append(val)
 
+  filtered_stores = sorted(filtered_stores, key=sort_by_score, reverse=True)
   store_list = make_store_list(filtered_stores)
 
   response = {
